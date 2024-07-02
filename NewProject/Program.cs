@@ -5,7 +5,8 @@ using Microsoft.OpenApi.Models;
 using NewProject.Controllers;
 using NewProject.Hubs;
 using PayPal.Api;
-
+using QuestPDF;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,11 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowCredentials());
 });
+
+// Configure QuestPDF license
+
+QuestPDF.Settings.License = LicenseType.Community;
+
 
 var app = builder.Build();
 
@@ -65,7 +71,5 @@ app.MapControllerRoute(
 app.MapHub<ChatHub>("/chatHub");
 
 app.Run();
-
-
 
 

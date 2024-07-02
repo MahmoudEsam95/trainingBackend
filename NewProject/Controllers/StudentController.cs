@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -8,7 +9,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-//using NewProject.Models;
+using iText.IO.Font.Constants;
+using iText.Kernel.Font;
+using iText.Kernel.Pdf;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+using Microsoft.Extensions.Logging;
+using System.IO;
+using iText.Layout;
+using QuestPDF.Fluent;
 
 
 namespace NewProject.Controllers
@@ -79,7 +88,61 @@ namespace NewProject.Controllers
         }
 
 
+
         [HttpGet]
+        public async Task<IActionResult> PdfbyID(int? id)
+        {
+            if (id == null)
+            {
+                return BadRequest("ID cannot be null");
+            }
+
+            var student = await _context.Students
+                .Include(s => s.Classes)
+                .Include(s => s.Stage)
+                .Include(s => s.Grade)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (student == null)
+            {
+                return NotFound();
+            }
+
+            var studentDocument = new StudentDocument(student);
+            var pdfStream = new MemoryStream();
+            studentDocument.GeneratePdf(pdfStream);
+            pdfStream.Position = 0;
+
+            return File(pdfStream, "application/pdf", $"Student_{id}.pdf");
+        }
+    
+
+
+    //[HttpGet]
+    //public async Task<IActionResult> PdfbyID(int? id)
+    //{
+    //    if (id == null)
+    //    {
+    //        return BadRequest("ID cannot be null");
+    //    }
+
+    //    var student = await _context.Students.FirstOrDefaultAsync(m => m.Id == id);
+    //    if (student == null)
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    var studentDocument = new StudentDocument(student);
+    //    var pdfStream = new MemoryStream();
+    //    studentDocument.GeneratePdf(pdfStream);
+    //    pdfStream.Position = 0;
+
+    //    return File(pdfStream, "application/pdf", $"Student_{id}.pdf");
+    //}
+
+
+
+    [HttpGet]
         public async Task<Student?> GetByID(int? id)
         {
             if (id == null)
@@ -97,6 +160,8 @@ namespace NewProject.Controllers
 
             return Student;
         }
+
+
 
 
         [HttpGet]
